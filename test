@@ -1,0 +1,36 @@
+
+
+test_style_1 = (
+    test_style_1.map(preprocess_generate_image, num_parallel_calls=autotune)
+    .cache()
+    .batch(batch_size)
+)
+test_base_1 = (
+    test_base_1.map(preprocess_generate_image, num_parallel_calls=autotune)
+    .cache()
+    .batch(batch_size)
+)
+
+lr_schedule = keras.optimizers.schedules.ExponentialDecay(
+    initial_learning_rate=2e-4,
+    decay_steps=200,
+    decay_rate=0.96,
+    staircase=True
+)
+
+model = sRDGAN(generator_G=gen_G, generator_F=gen_F, discriminator_X=disc_X, discriminator_Y=disc_Y)
+
+odel.compile(
+    gen_G_optimizer=keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.5),
+    gen_F_optimizer=keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.5),
+    disc_X_optimizer=keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.5),
+    disc_Y_optimizer=keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.5),
+    gen_loss_fn=generator_loss_fn,
+    disc_loss_fn=discriminator_loss_fn,
+)
+
+weight_file = 
+model.load_weights(weight_file)
+
+os.makedirs('synthetic_dataset_1')
+fake_y = make_prediction_save_images(gen_G, test_base_1, 100, 'synthetic_dataset_1\\')
