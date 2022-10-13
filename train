@@ -1,0 +1,67 @@
+'''
+# load training data
+
+'''
+
+'''
+# load testing data
+
+
+
+
+'''
+
+
+# create dataset object
+train_style, train_base = separate_samples(X_train, Y_train)
+test_style, test_base = separate_samples(X_test,Y_test)
+len = len(X_train)
+
+train_style = (
+    train_style.map(preprocess_base_image, num_parallel_calls=autotune)
+    .cache()
+    .shuffle(len)
+    .batch(batch_size)
+)
+train_base = (
+    train_base.map(preprocess_base_image, num_parallel_calls=autotune)
+    .cache()
+    .shuffle(len)
+    .batch(batch_size)
+)
+test_style = (
+    test_style.map(preprocess_generate_image, num_parallel_calls=autotune)
+    .cache()
+    .batch(batch_size)
+)
+test_base = (
+    test_base.map(preprocess_generate_image, num_parallel_calls=autotune)
+    .cache()
+    .batch(batch_size)
+)
+
+dataset_train = tf.data.Dataset.zip((train_base, train_style))
+
+
+plotter = GANMonitor()
+checkpoint_filepath = "run_{epoch:08d}.h5"
+model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
+    filepath=checkpoint_filepath, save_freq ='epoch', period=5,
+)
+
+model = sRDGAN(generator_G=gen_G, generator_F=gen_F, discriminator_X=disc_X, discriminator_Y=disc_Y)
+
+model.compile(
+    gen_G_optimizer=keras.optimizers.Adam(learning_rate=2e-4, beta_1=0.5),
+    gen_F_optimizer=keras.optimizers.Adam(learning_rate=2e-4, beta_1=0.5),
+    disc_X_optimizer=keras.optimizers.Adam(learning_rate=2e-4, beta_1=0.5),
+    disc_Y_optimizer=keras.optimizers.Adam(learning_rate=2e-4, beta_1=0.5),
+    gen_loss_fn=generator_loss_fn,
+    disc_loss_fn=discriminator_loss_fn,
+)
+
+model.fit(
+    dataset_train,
+    epochs=60,
+    callbacks=[plotter, model_checkpoint_callback],
+)
