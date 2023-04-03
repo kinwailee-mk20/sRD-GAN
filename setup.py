@@ -22,8 +22,15 @@ from skimage.util import img_as_ubyte
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-import tensorflow_addons as tfa
-from tensorflow.keras.models import Model
+from tensorflow.keras.models import Model, Sequential
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.backend import expand_dims
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.layers import Input, Conv2D, concatenate, Add, Activation, Flatten, AveragePooling2D, Dropout, Dense, MaxPool2D
+from tensorflow.keras.layers import MaxPooling2D, GlobalAveragePooling2D, GlobalMaxPool2D, BatchNormalization, AveragePooling2D, ZeroPadding2D
+from tensorflow.keras.regularizers import l2
 
 autotune = tf.data.experimental.AUTOTUNE
 
